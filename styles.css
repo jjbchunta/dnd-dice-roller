@@ -1,6 +1,18 @@
 .wrap {
     display: flex;
     justify-content: center;
+    flex-direction: row;
+}
+
+#stat_sheet {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+}
+
+#spells {
+    display: flex;
+    flex-direction: column;
 }
 
 #stat_sheet input[type="number"] {
@@ -30,4 +42,54 @@ body[spell_entry="entry"] .manual_spell {
 #dice_roll_result {
     margin: 10px 0 0 0;
     font-size: 1.5em;
+}
+
+@media screen and ( max-width: 676px ) {
+    .wrap {
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        align-items: center;
+    }
+    #spells {
+        flex-direction: column-reverse;
+        width: 480px;
+    }
+    #stat_sheet {
+        flex-direction: row;
+    }
+    #stat_sheet fieldset {
+        width: 210px;
+    }
+}
+
+@media screen and ( max-width: 472px ) {
+    #stat_sheet {
+        flex-direction: column;
+        max-width: calc( 100% - 0.70em ) !important;
+        width: calc( 100% - 0.70em ) !important;
+    }
+    #stat_sheet fieldset {
+        max-width: calc( 100% - ( 0.70em * 2 ) ) !important;
+        width: calc( 100% - ( 0.70em * 2 ) ) !important;
+        margin-left: -0.175em;
+    }
+    #spells {
+        width: 100%;
+    }
+    #spells select, #spells input[type="text"] {
+        width: 100%;
+    }
+    #ability_table {
+        border-spacing: 0 22px;
+    }
+    #ability_table tr > td:nth-child(1) {
+        width: 120px; 
+        position: absolute;
+        display: block;
+        transform: translate( 0, -100% );
+    }
+    #ability_table tr > td:nth-child(2) {
+        width: 100%;
+    }
 }
