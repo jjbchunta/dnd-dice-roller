@@ -6,7 +6,7 @@
     <title>Document</title>
     <link rel="stylesheet" href="styles.css">
 </head>
-<body>
+<body id="body" spell_entry="manual">
     <div class="wrap">
         <!-- Stat Sheet -->
         <div id="stat_sheet">
@@ -75,6 +75,18 @@
         </div>
 
         <!-- Spells -->
+        <div id="spells">
+            <fieldset>
+                <legend>Spells:</legend>
+                <table id="ability_table">
+                </table>
+            </fieldset>
+            <fieldset>
+                <legend>Result:</legend>
+                <p id="dice_roll_proof"></p>
+                <h1 id="dice_roll_result"></h1>
+            </fieldset>
+        </div>
     </div>
     <script src="source.js"></script>
 </body>

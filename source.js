@@ -32,6 +32,13 @@ const modifiers = {
 };
 let prof_bonus_field = undefined;
 let last_proof = [];
+let body = undefined;
+let dice_roll_proof = undefined;
+let dice_roll_result = undefined;
+
+document.addEventListener('DOMContentLoaded', function() {
+    generate_ability_table();
+});
 
 /**
  * Convert the entered ability scores into modifiers.
@@ -56,7 +63,10 @@ function refresh_stats() {
         } else {
             ability_field = ability_args[ score_ref_key ];
         }
-        const ability_score = Number( ability_field.value );
+        let ability_score = 10;
+        if ( ability_field ) {
+            ability_score = Number( ability_field.value );
+        }
         const modifier_amount = Math.floor( ( ability_score - 10 ) / 2 );
         modifiers[ ability ][ 'amt' ] = modifier_amount;
 
@@ -143,7 +153,7 @@ function is_numeric( thing ) {
  * @returns {Number} The evaluated total.
  */
 function evaluate_dice_expression( expression ) {
-    refresh_stats(); // always, regardless
+    refresh_stats(); // just so everything stays up to date
 
     expression = sanitize_dice_expression( expression );
     let expression_parts = expression.split( '+' );
@@ -202,6 +212,119 @@ function evaluate_dice_expression( expression ) {
         running_total += expression_part;
     }
 
-    console.log( last_proof.join( ' + ' ) );
     return running_total;
+}
+
+/**
+ * Check if the current environment is set for dice expressions to be entered
+ * manually.
+ * 
+ * @returns {Boolean} True if yes, false if no.
+ */
+function is_manual_spell_entry_mode() {
+    if ( undefined === body ) {
+        body = document.getElementById( "body" );
+    }
+    let mode = body.getAttribute( "spell_entry" );
+    return 'manual' === mode;
+}
+
+/**
+ * Evaluate the dice expression for a given ability slot.
+ * 
+ * @param {Element} button The "Roll" button invoking this request.
+ */
+function perform_ability_slot_roll( button ) {
+    // The current set-up for an ability row
+    /*
+    <tr> <!-- Where we wanna be -->
+        <!-- Other Nodes -->
+        <td><button onclick="perform_ability_slot_roll( this )">Roll</button></td>
+    </tr>
+    */
+   // Fetch
+    const ability_row = button.parentNode.parentNode;
+    let input_class;
+    if ( is_manual_spell_entry_mode() ) {
+        input_class = '.manual_spell';
+    } else {
+        input_class = '.select_spell';
+    }
+    const ability_input = ability_row.querySelector( input_class );
+
+    // Evaluate
+    const dice_expression = ability_input.value;
+    const dice_expression_result = evaluate_dice_expression( dice_expression );
+
+    // Display
+    if ( undefined === dice_roll_proof ) {
+        dice_roll_proof = document.getElementById( 'dice_roll_proof' );
+    }
+    if ( undefined === dice_roll_result ) {
+        dice_roll_result = document.getElementById( 'dice_roll_result' );
+    }
+    dice_roll_proof.textContent = last_proof.join( ' + ' );
+    dice_roll_result.textContent = dice_expression_result;
+}
+
+function generate_ability_table() {
+    const ability_table = document.getElementById( 'ability_table' );
+
+    /*
+    <tr>
+        <td><label>Ability 1</label></td>
+        <td>
+            <select name="ability_spell" class="select_spell" ability="1">
+                <option value="">Some Spell</option>
+            </select>
+            <input type="text" class="manual_spell" placeholder="Dice Expression... (ex: 2d8+str+4d6)">
+        </td>
+        <td><button onclick="perform_ability_slot_roll( this )">Roll</button></td>
+    </tr>
+    */
+
+    function wrap_in_td( element ) {
+        const td = document.createElement( 'td' );
+        td.appendChild( element );
+        return td;
+    }
+
+    for ( let i = 1; i <= 9; i++ ) {
+        const tr_row = document.createElement( 'tr' );
+
+        // Label
+        let label = document.createElement( 'label' );
+        label.textContent = 'Ability ' + i;
+        label = wrap_in_td( label );
+        
+        // Input
+        let input_wrap = document.createElement( 'div' );
+        let select = document.createElement( 'select' );
+        select.name = "ability_spell";
+        select.classList = "select_spell";
+        select.setAttribute( 'ability', i );
+        let manual = document.createElement( 'input' );
+        manual.type = "text";
+        manual.classList = "manual_spell";
+        if ( 1 === i ) {
+            manual.placeholder = "Dice Expression... (ex: 2d8+str+4d6)";
+        }
+        input_wrap.appendChild( select );
+        input_wrap.appendChild( manual );
+        input_wrap = wrap_in_td( input_wrap );
+
+        // Button
+        let button = document.createElement( 'button' );
+        button.onclick = function() {
+            perform_ability_slot_roll( button );
+        };
+        button.innerHTML = 'Roll';
+        button = wrap_in_td( button );
+
+        tr_row.appendChild( label );
+        tr_row.appendChild( input_wrap );
+        tr_row.appendChild( button );
+
+        ability_table.appendChild( tr_row );
+    }
 }

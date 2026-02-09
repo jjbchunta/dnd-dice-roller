@@ -6,3 +6,28 @@
 #stat_sheet input[type="number"] {
     width: 50px;
 }
+
+body[spell_entry="manual"] .select_spell {
+    display: none;
+}
+body[spell_entry="manual"] .manual_spell {
+    display: inline-block;
+}
+body[spell_entry="entry"] .select_spell {
+    display: inline-block;
+}
+body[spell_entry="entry"] .manual_spell {
+    display: none !important;
+}
+
+#spells select, #spells input[type="text"] {
+    width: 250px;
+}
+
+#dice_roll_proof {
+    margin: 0;
+}
+#dice_roll_result {
+    margin: 10px 0 0 0;
+    font-size: 1.5em;
+}
