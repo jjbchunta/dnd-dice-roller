@@ -31,6 +31,7 @@ const modifiers = {
     },
 };
 let prof_bonus_field = undefined;
+let last_proof = [];
 
 /**
  * Convert the entered ability scores into modifiers.
@@ -146,7 +147,7 @@ function evaluate_dice_expression( expression ) {
 
     expression = sanitize_dice_expression( expression );
     let expression_parts = expression.split( '+' );
-    let proof = [];
+    last_proof = [];
 
     // Interpret each part of the given expression
     for (
@@ -169,7 +170,7 @@ function evaluate_dice_expression( expression ) {
                 running_total += rolled_amount;
             }
             expression_part = running_total;
-            proof.push( '[ ' + rolled_amounts.join( ', ' ) + ' ]' );
+            last_proof.push( '[ ' + rolled_amounts.join( ', ' ) + ' ]' );
         }
 
         // If this is a modifier...
@@ -177,13 +178,13 @@ function evaluate_dice_expression( expression ) {
             const modifier = modifiers[ expression_part ][ 'amt' ];
             const prof_bonus = modifiers[ expression_part ][ 'prof' ];
             expression_part = modifier + prof_bonus;
-            proof.push( expression_part );
+            last_proof.push( expression_part );
         }
 
         // If this is just a regular number...
         if ( is_numeric( expression_part ) ) {
             expression_part = Number( expression_part );
-            proof.push( expression_part );
+            last_proof.push( expression_part );
         }
 
         expression_parts[ expression_index ] = expression_part;
@@ -201,6 +202,6 @@ function evaluate_dice_expression( expression ) {
         running_total += expression_part;
     }
 
-    console.log( proof.join( ' + ' ) );
+    console.log( last_proof.join( ' + ' ) );
     return running_total;
 }

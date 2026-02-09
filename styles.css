@@ -1,0 +1,8 @@
+.wrap {
+    display: flex;
+    justify-content: center;
+}
+
+#stat_sheet input[type="number"] {
+    width: 50px;
+}
