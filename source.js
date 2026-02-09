@@ -1,45 +1,75 @@
 const modifiers = {
     'str': {
         'id': 'strength',
-        'amt': 0
+        'amt': 0,
+        'prof': 0
     },
     'dex': {
         'id': 'dexterity',
-        'amt': 0
+        'amt': 0,
+        'prof': 0
     },
     'con': {
         'id': 'constitution',
-        'amt': 0
+        'amt': 0,
+        'prof': 0
     },
     'int': {
         'id': 'intelligence',
-        'amt': 0
+        'amt': 0,
+        'prof': 0
     },
     'wis': {
         'id': 'wisdom',
-        'amt': 0
+        'amt': 0,
+        'prof': 0
     },
     'cha': {
         'id': 'charisma',
-        'amt': 0
+        'amt': 0,
+        'prof': 0
     },
 };
+let prof_bonus_field = undefined;
 
 /**
  * Convert the entered ability scores into modifiers.
  */
 function refresh_stats() {
+    // Get the set prof score
+    let prof_bonus = 0;
+    if ( undefined === prof_bonus_field ) {
+        prof_bonus_field = document.getElementById( 'prof_bonus' );
+    }
+    if ( prof_bonus_field ) {
+        prof_bonus = Number( prof_bonus_field.value );
+    }
+
     for ( const [ ability, ability_args ] of Object.entries( modifiers ) ) {
+        // Calculate modifier amount
+        const score_ref_key = 'score_ref';
         let ability_field;
-        if ( !ability_args.hasOwnProperty( 'ref' ) ) {
+        if ( !ability_args.hasOwnProperty( score_ref_key ) ) {
             ability_field = document.getElementById( ability_args[ 'id' ] );
-            modifiers[ ability ][ 'ref' ] = ability_field;
+            modifiers[ ability ][ score_ref_key ] = ability_field;
         } else {
-            ability_field = ability_args[ 'ref' ];
+            ability_field = ability_args[ score_ref_key ];
         }
         const ability_score = Number( ability_field.value );
         const modifier_amount = Math.floor( ( ability_score - 10 ) / 2 );
         modifiers[ ability ][ 'amt' ] = modifier_amount;
+
+        // Set proficiency points
+        const prof_ref_key = 'prof_ref';
+        let prof_field;
+        if ( !ability_args.hasOwnProperty( prof_ref_key ) ) {
+            prof_field = document.getElementById( ability_args[ 'id' ] + '_prof' );
+            modifiers[ ability ][ prof_ref_key ] = prof_field;
+        } else {
+            prof_field = ability_args[ prof_ref_key ];
+        }
+        const is_prof = Boolean( prof_field.checked );
+        modifiers[ ability ][ 'prof' ] = is_prof ? prof_bonus : 0;
     }
 }
 
@@ -144,7 +174,9 @@ function evaluate_dice_expression( expression ) {
 
         // If this is a modifier...
         if ( is_modifier( expression_part ) ) {
-            expression_part = modifiers[ expression_part ][ 'amt' ];
+            const modifier = modifiers[ expression_part ][ 'amt' ];
+            const prof_bonus = modifiers[ expression_part ][ 'prof' ];
+            expression_part = modifier + prof_bonus;
             proof.push( expression_part );
         }
 
