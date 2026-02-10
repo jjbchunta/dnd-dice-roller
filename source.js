@@ -1,34 +1,38 @@
-const modifiers = {
+const stats_constants = {
     'str': {
         'id': 'strength',
         'amt': 0,
-        'prof': 0
+        'modifier': true
     },
     'dex': {
         'id': 'dexterity',
         'amt': 0,
-        'prof': 0
+        'modifier': true
     },
     'con': {
         'id': 'constitution',
         'amt': 0,
-        'prof': 0
+        'modifier': true
     },
     'int': {
         'id': 'intelligence',
         'amt': 0,
-        'prof': 0
+        'modifier': true
     },
     'wis': {
         'id': 'wisdom',
         'amt': 0,
-        'prof': 0
+        'modifier': true
     },
     'cha': {
         'id': 'charisma',
         'amt': 0,
-        'prof': 0
+        'modifier': true
     },
+    'prof': {
+        'id': 'proficiency',
+        'amt': 0
+    }
 };
 let prof_bonus_field = undefined;
 let last_proof = [];
@@ -41,46 +45,27 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 /**
- * Convert the entered ability scores into modifiers.
+ * Convert the entered ability scores into stats_constants.
  */
 function refresh_stats() {
-    // Get the set prof score
-    let prof_bonus = 0;
-    if ( undefined === prof_bonus_field ) {
-        prof_bonus_field = document.getElementById( 'prof_bonus' );
-    }
-    if ( prof_bonus_field ) {
-        prof_bonus = Number( prof_bonus_field.value );
-    }
-
-    for ( const [ ability, ability_args ] of Object.entries( modifiers ) ) {
+    for ( const [ ability, ability_args ] of Object.entries( stats_constants ) ) {
         // Calculate modifier amount
         const score_ref_key = 'score_ref';
         let ability_field;
         if ( !ability_args.hasOwnProperty( score_ref_key ) ) {
             ability_field = document.getElementById( ability_args[ 'id' ] );
-            modifiers[ ability ][ score_ref_key ] = ability_field;
+            stats_constants[ ability ][ score_ref_key ] = ability_field;
         } else {
             ability_field = ability_args[ score_ref_key ];
         }
-        let ability_score = 10;
-        if ( ability_field ) {
-            ability_score = Number( ability_field.value );
+        let score = Number( ability_field.value );
+        if (
+            ability_args.hasOwnProperty( 'modifier' )
+            && true === ability_args[ 'modifier' ]
+        ) {
+            score = Math.floor( ( score - 10 ) / 2 );
         }
-        const modifier_amount = Math.floor( ( ability_score - 10 ) / 2 );
-        modifiers[ ability ][ 'amt' ] = modifier_amount;
-
-        // Set proficiency points
-        const prof_ref_key = 'prof_ref';
-        let prof_field;
-        if ( !ability_args.hasOwnProperty( prof_ref_key ) ) {
-            prof_field = document.getElementById( ability_args[ 'id' ] + '_prof' );
-            modifiers[ ability ][ prof_ref_key ] = prof_field;
-        } else {
-            prof_field = ability_args[ prof_ref_key ];
-        }
-        const is_prof = Boolean( prof_field.checked );
-        modifiers[ ability ][ 'prof' ] = is_prof ? prof_bonus : 0;
+        stats_constants[ ability ][ 'amt' ] = score;
     }
 }
 
@@ -130,7 +115,7 @@ function is_dice_roll( expression ) {
  * @returns {Boolean} True if yes, false if no.
  */
 function is_modifier( expression ) {
-    return modifiers.hasOwnProperty( expression );
+    return stats_constants.hasOwnProperty( expression );
 }
 
 /**
@@ -166,10 +151,15 @@ function evaluate_dice_expression( expression ) {
         expression_index++
     ) {
         let expression_part = expression_parts[ expression_index ];
-
-        // If this is a dice roll expression...
         const dice_parts = is_dice_roll( expression_part );
-        if ( false !== dice_parts ) {
+
+        // If this is a modifier...
+        if ( is_modifier( expression_part ) ) {
+            expression_part = stats_constants[ expression_part ][ 'amt' ];
+            last_proof.push( expression_part );
+        }
+        // If this is a dice roll expression...
+        else if ( false !== dice_parts ) {
             let running_total = 0;
             let total_rolls = dice_parts[ 'total_rolls' ];
             let dice_sides = dice_parts[ 'dice_sides' ];
@@ -182,17 +172,8 @@ function evaluate_dice_expression( expression ) {
             expression_part = running_total;
             last_proof.push( '[ ' + rolled_amounts.join( ', ' ) + ' ]' );
         }
-
-        // If this is a modifier...
-        if ( is_modifier( expression_part ) ) {
-            const modifier = modifiers[ expression_part ][ 'amt' ];
-            const prof_bonus = modifiers[ expression_part ][ 'prof' ];
-            expression_part = modifier + prof_bonus;
-            last_proof.push( expression_part );
-        }
-
         // If this is just a regular number...
-        if ( is_numeric( expression_part ) ) {
+        else if ( is_numeric( expression_part ) ) {
             expression_part = Number( expression_part );
             last_proof.push( expression_part );
         }
@@ -267,8 +248,18 @@ function perform_ability_slot_roll( button ) {
     dice_roll_result.textContent = dice_expression_result;
 }
 
+/**
+ * Generate a list of ability fields that the user can enter spells into.
+ */
 function generate_ability_table() {
     const ability_table = document.getElementById( 'ability_table' );
+
+    let disable_inputs = false;
+    try {
+        disable_inputs = disable_ability_table === true;
+    } catch ( e ) {
+        // Just don't
+    }
 
     /*
     <tr>
@@ -303,22 +294,20 @@ function generate_ability_table() {
         select.name = "ability_spell";
         select.classList = "select_spell";
         select.setAttribute( 'ability', i );
+        select.disabled = disable_inputs;
         let manual = document.createElement( 'input' );
         manual.type = "text";
         manual.classList = "manual_spell";
-        if ( 1 === i ) {
-            manual.placeholder = "Dice Expression... (ex: 2d8+str+4d6)";
-        }
+        manual.disabled = disable_inputs;
         input_wrap.appendChild( select );
         input_wrap.appendChild( manual );
         input_wrap = wrap_in_td( input_wrap );
 
         // Button
         let button = document.createElement( 'button' );
-        button.onclick = function() {
-            perform_ability_slot_roll( button );
-        };
+        button.setAttribute( "onclick", "perform_ability_slot_roll( this )" );
         button.innerHTML = 'Roll';
+        button.disabled = disable_inputs;
         button = wrap_in_td( button );
 
         tr_row.appendChild( label );

@@ -1,7 +1,22 @@
+body {
+    display: flex;
+    justify-content: center;
+}
+
+h1 {
+    margin-bottom: 0;
+}
+
 .wrap {
     display: flex;
     justify-content: center;
     flex-direction: row;
+    max-width: 1000px;
+}
+
+.article {
+    flex-direction: column;
+    justify-content: start;
 }
 
 #stat_sheet {
@@ -13,6 +28,10 @@
 #spells {
     display: flex;
     flex-direction: column;
+}
+.spells_guide_link {
+    text-align: right;
+    width: 100%;
 }
 
 #stat_sheet input[type="number"] {
@@ -32,8 +51,11 @@ body[spell_entry="entry"] .manual_spell {
     display: none !important;
 }
 
-#spells select, #spells input[type="text"] {
+#ability_table select, #ability_table input[type="text"] {
     width: 250px;
+}
+#ability_table select:disabled, #ability_table input:disabled {
+    color: black;
 }
 
 #dice_roll_proof {
@@ -77,7 +99,7 @@ body[spell_entry="entry"] .manual_spell {
     #spells {
         width: 100%;
     }
-    #spells select, #spells input[type="text"] {
+    #ability_table select, #ability_table input[type="text"] {
         width: 100%;
     }
     #ability_table {

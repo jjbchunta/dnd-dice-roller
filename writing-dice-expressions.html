@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Writing Dice Expressions</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body spell_entry="manual">
+    <div class="wrap article">
+        <a href="/index.html">Return To Home</a>
+
+        <h1>Writing Dice Expressions</h1>
+        <p>
+            When interacting with the home page, you'll see a list of input
+            fields similar to the ones displayed below:
+        </p>
+        <div>
+            <table id="ability_table"></table>
+        </div>
+        <p>
+            All of these input fields are the slots where you can enter your
+            character's spell's dice expressions for each ability level. And a
+            dice expression is just the math that goes behind a cast.
+        </p>
+        <p>
+            Let's say you had a spell that takes 2 rolls of a 8 sided dice, and
+            adds your strength modifier to the result of those two rolls. To
+            write out this expression, you'd use the proper notation to
+            represent these different calculations.
+        </p>
+        <p>
+            The dice rolls for that example would be represented with the
+            expression <strong>2d8</strong>, where the first number is the times
+            you roll the dice, the second number is the sides of that dice, and
+            the <strong>d</strong> seperates the two. Everytime this expression
+            is evaluated, the result is random.
+        </p>
+        <p>
+            Furthermore, once you define your stat sheet, your ability modifiers
+            can be included by using the slug for that ability. The bonuses
+            being automatically calculated.
+        </p>
+        <ul>
+            <li>Strength = <strong>str</strong></li>
+            <li>Dexterity = <strong>dex</strong></li>
+            <li>Constitution = <strong>con</strong></li>
+            <li>Intelligence = <strong>int</strong></li>
+            <li>Wisdom = <strong>wis</strong></li>
+            <li>Charisma = <strong>cha</strong></li>
+            <li>Proficiency = <strong>prof</strong></li>
+        </ul>
+        <p>
+            Meaning it would just be a matter of writing out simple math inside
+            of one of your ability fields to have the computer evaluate a dice
+            expression for you. And to represent our original example, our dice
+            expression would be:
+        </p>
+        <div>
+            <table id="ability_table">
+                <tr>
+                    <td><label>Ability #</label></td>
+                    <td>
+                        <div>
+                            <select name="ability_spell" class="select_spell" ability="1" disabled=""></select>
+                            <input type="text" class="manual_spell" disabled="" value="2d8 + str">
+                        </div>
+                    </td>
+                    <td><button disabled>Roll</button></td>
+                </tr>
+            </table>
+        </div>
+        <p>
+            One quick thing I'd like to note, formatting does not matter. If you
+            want to add spaces, that's fine. It won't break anything.
+        </p>
+        <p>
+            Dice expressions can be evaluated using the <strong>Roll</strong>
+            button, and the result as well as how the computer got to it's
+            answer will all be displayed inside of the results section.
+        </p>
+        <p>
+            Hopefully this makes sense. 😭
+        </p>
+
+        <a href="/index.html">Return To Home</a>
+    </div>
+    <script type="text/javascript">
+        const disable_ability_table = true;
+    </script>
+    <script type="text/javascript" src="source.js"></script>
+</body>
+</html>
